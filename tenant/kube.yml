@@ -1,0 +1,52 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  # Unique key of the Deployment instance
+  name: tenant
+spec:
+  # 3 Pods should exist at all times.
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        # Apply this label to pods and default
+        # the Deployment label selector to this value
+        app: tenant
+    spec:
+      containers:
+      - name: tenant
+        # Run this image
+        image: tenant:v1
+        ports:
+        - containerPort: 18080
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  # Unique key of the Service instance
+  name: tenant-svc
+spec:
+  ports:
+    # Accept traffic sent to port 80
+    #- name: http
+    - protocol: TCP
+      port: 80
+      targetPort: 18080
+      nodePort: 30301 
+  selector:
+    # Loadbalance traffic across Pods matching
+    # this label selector
+    app: tenant
+  type: NodePort
+
+---
+#kind: Endpoints
+#apiVersion: v1
+#metadata:
+#  name: tenant-svc
+#subsets:
+#  - addresses:
+#      - ip: 10.46.128.144
+#    ports:
+#      - port: 18080

@@ -1,0 +1,40 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  # Unique key of the Deployment instance
+  name: facade
+spec:
+  # 3 Pods should exist at all times.
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        # Apply this label to pods and default
+        # the Deployment label selector to this value
+        app: facade
+    spec:
+      containers:
+      - name: facade
+        # Run this image
+        image: facade:v1
+        ports:
+        - containerPort: 18080
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  # Unique key of the Service instance
+  name: facade-svc
+spec:
+  ports:
+    # Accept traffic sent to port 80
+    - protocol: TCP
+      port: 80
+      targetPort: 18080
+      nodePort: 30300 
+  selector:
+    # Loadbalance traffic across Pods matching
+    # this label selector
+    app: facade
+  type: NodePort
